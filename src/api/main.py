@@ -24,6 +24,9 @@ from nltk.tokenize import word_tokenize
 # ── Chemins modèles ────────────────────────────────────────────────────────────
 MODELS_DIR = os.getenv("MODELS_DIR", "models")
 
+# Seuil de confiance NLP : en dessous, on fait confiance au numérique
+NLP_CONFIDENCE_THRESHOLD = 0.70
+
 
 def load_model(name: str):
     path = os.path.join(MODELS_DIR, name)
@@ -71,6 +74,8 @@ class PredictionResponse(BaseModel):
     prix_estime: float
     confidence: Optional[float] = None
     nlp_categorie: Optional[str] = None
+    nlp_confidence: Optional[float] = None
+    fusion_source: Optional[str] = None  # "numerique" ou "nlp"
 
 
 class HealthResponse(BaseModel):
@@ -139,43 +144,67 @@ def predict(req: PredictionRequest):
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    # Encoder Source
+    # ── 1. Encoder Source ──────────────────────────────────────────────────────
     try:
         source_enc = m["le_source"].transform([req.source])[0]
     except ValueError:
         source_enc = 0  # classe inconnue → 0
 
-    # Normaliser features numériques
-    raw = np.array(
-        [[req.poids, req.volume, req.conductivite, req.opacite, req.rigidite]]
-    )
+    # ── 2. Features numériques ─────────────────────────────────────────────────
+    import pandas as pd
+    raw = pd.DataFrame([[req.poids, req.volume, req.conductivite, req.opacite, req.rigidite]],
+                   columns=["Poids", "Volume", "Conductivite", "Opacite", "Rigidite"])
     scaled = m["scaler"].transform(raw)
     features = np.append(scaled[0], source_enc).reshape(1, -1)
 
-    # Classification
-    categorie = m["classifier"].predict(features)[0]
+    # ── 3. Classification numérique ────────────────────────────────────────────
+    categorie_num = m["classifier"].predict(features)[0]
 
-    # Probabilité (si dispo)
-    confidence = None
+    confidence_num = None
     if hasattr(m["classifier"], "predict_proba"):
         proba = m["classifier"].predict_proba(features)[0]
-        confidence = float(np.max(proba))
+        confidence_num = float(np.max(proba))
 
-    # Régression (prix estimé)
+    # ── 4. Régression (prix estimé) ────────────────────────────────────────────
     prix = float(m["regressor"].predict(features)[0])
 
-    # NLP (optionnel)
+    # ── 5. NLP + logique de fusion ─────────────────────────────────────────────
     nlp_categorie = None
+    nlp_confidence = None
+    fusion_source = "numerique"
+    categorie_finale = str(categorie_num)
+
     if req.rapport:
         texte_clean = preprocess_text(req.rapport)
         vec = m["tfidf"].transform([texte_clean])
         nlp_categorie = m["nlp_classifier"].predict(vec)[0]
 
+        # Confiance NLP si le classifieur le supporte
+        if hasattr(m["nlp_classifier"], "predict_proba"):
+            proba_nlp = m["nlp_classifier"].predict_proba(vec)[0]
+            nlp_confidence = float(np.max(proba_nlp))
+        elif hasattr(m["nlp_classifier"], "decision_function"):
+            # LinearSVC : score de décision → confiance approchée via softmax
+            scores = m["nlp_classifier"].decision_function(vec)[0]
+            exp_scores = np.exp(scores - np.max(scores))
+            nlp_confidence = float(np.max(exp_scores / exp_scores.sum()))
+
+        # Fusion : NLP prioritaire seulement si confiance suffisante
+        if nlp_confidence is not None and nlp_confidence >= NLP_CONFIDENCE_THRESHOLD:
+            categorie_finale = str(nlp_categorie)
+            fusion_source = "nlp"
+        else:
+            # Confiance NLP trop faible → on garde le numérique
+            nlp_categorie = str(nlp_categorie)  # on l'affiche quand même
+            fusion_source = "numerique (nlp confiance insuffisante)"
+
     return PredictionResponse(
-        categorie=str(categorie),
+        categorie=categorie_finale,
         prix_estime=round(prix, 2),
-        confidence=round(confidence, 4) if confidence else None,
+        confidence=round(confidence_num, 4) if confidence_num is not None else None,
         nlp_categorie=str(nlp_categorie) if nlp_categorie else None,
+        nlp_confidence=round(nlp_confidence, 4) if nlp_confidence is not None else None,
+        fusion_source=fusion_source,
     )
 
 

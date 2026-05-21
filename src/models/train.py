@@ -39,7 +39,9 @@ FEATURES = ["Poids", "Volume", "Conductivite", "Opacite", "Rigidite", "Source_en
 TARGET = "Categorie"
 MIN_ACCURACY = 0.70
 MODEL_REGISTRY_NAME = "EcoSmartClassifier"
+mlflow.set_tracking_uri("http://localhost:5000")
 
+print(f"[mlflow] Tracking URI: {mlflow.get_tracking_uri()}")
 
 # ══════════════════════════════════════════════════════════════════════
 # CHARGEMENT & SPLIT

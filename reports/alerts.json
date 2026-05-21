@@ -1,7 +1,5 @@
 {
-  "timestamp": "2026-05-17T13:46:49.037814",
-  "alerts": [
-    "[!] 3 colonne(s) numerique(s) en drift"
-  ],
-  "n_alerts": 1
+  "timestamp": "2026-05-21T17:25:53.861808",
+  "alerts": [],
+  "n_alerts": 0
 }

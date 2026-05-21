@@ -1,20 +1,20 @@
 {
-  "timestamp": "2026-05-17T13:46:44.902440",
+  "timestamp": "2026-05-21T17:25:51.605882",
   "reference": "data/processed/dataset_clean.csv",
-  "current": "data/processed/dataset_production.csv",
+  "current": "data/processed/dataset_clean.csv",
   "threshold": 0.1,
   "columns": {
     "Poids": {
-      "js_divergence": 0.6247,
-      "drifted": true
+      "js_divergence": 0.0,
+      "drifted": false
     },
     "Volume": {
-      "js_divergence": 0.3232,
-      "drifted": true
+      "js_divergence": 0.0,
+      "drifted": false
     },
     "Conductivite": {
-      "js_divergence": 0.811,
-      "drifted": true
+      "js_divergence": 0.0,
+      "drifted": false
     },
     "Opacite": {
       "js_divergence": 0.0,
@@ -25,6 +25,6 @@
       "drifted": false
     }
   },
-  "n_drifted": 3,
-  "dataset_drift": true
+  "n_drifted": 0,
+  "dataset_drift": false
 }

@@ -1,0 +1,38 @@
+artifact_path: mlflow-artifacts:/3/models/m-0b1b8b12a5724f3293f0da0d1aeea92c/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.11.9
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.12.0
+model_id: m-0b1b8b12a5724f3293f0da0d1aeea92c
+model_size_bytes: 772783
+model_uuid: m-0b1b8b12a5724f3293f0da0d1aeea92c
+prompts: null
+run_id: 25605e9f45fb4ec6afba54ce410dee54
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "Poids", "required": true}, {"type": "double",
+    "name": "Volume", "required": true}, {"type": "double", "name": "Conductivite",
+    "required": true}, {"type": "double", "name": "Opacite", "required": true}, {"type":
+    "double", "name": "Rigidite", "required": true}, {"type": "long", "name": "Source_encoded",
+    "required": true}]'
+  outputs: '[{"type": "string", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-05-21 17:22:38.627664'
