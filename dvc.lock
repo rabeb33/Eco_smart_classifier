@@ -11,8 +11,8 @@ stages:
       size: 2586532
     - path: src/data/preprocess.py
       hash: md5
-      md5: 62f21b20325753d6651f6c23f0436eaa
-      size: 4166
+      md5: b6c597119584118a67223e2e41e1bc95
+      size: 4191
     params:
       params.yaml:
         preprocess.iqr_factor: 3.0
@@ -32,8 +32,8 @@ stages:
       size: 2140891
     - path: src/models/train.py
       hash: md5
-      md5: b74157ff237a3602f6934aec71903111
-      size: 15679
+      md5: d2e9e5f5120ca0fa6505fe43dce6ec92
+      size: 15817
     params:
       params.yaml:
         train.n_estimators: 100
@@ -42,12 +42,12 @@ stages:
     outs:
     - path: models/classifier_best.pkl
       hash: md5
-      md5: 0096a7de51816b1a8f70860fea2644c0
+      md5: 7983ff98484060406801f1d42e5f7eb8
       size: 757689
     - path: models/regressor_best.pkl
       hash: md5
-      md5: d0184f1e8c31a0d38238db57b83f2876
-      size: 14448657
+      md5: 8b1efc558532d24dc907b29bcb16f814
+      size: 14449665
     - path: reports/metrics_classification.json
       hash: md5
       md5: ec378b06cc613d79073c479c4b7e861c
@@ -62,16 +62,16 @@ stages:
       size: 2140891
     - path: src/nlp/train_nlp.py
       hash: md5
-      md5: eb74827a998dd04ec7738928986a5728
-      size: 10385
+      md5: 33648bde4b6c6d0a875b11802cff927f
+      size: 12795
     outs:
     - path: models/nlp_classifier.pkl
       hash: md5
-      md5: 3c61bd354e56dc949d5e9ded1ff45d32
+      md5: eea352e737398df689b6dcf4b2319e55
       size: 42103
     - path: models/tfidf_vectorizer.pkl
       hash: md5
-      md5: 0375b118a617a4b1e4beaa78ef37e9eb
+      md5: 19f8f1f4a0e6790f7ce115a9f46be0f4
       size: 17099
     - path: reports/metrics_nlp.json
       hash: md5
