@@ -271,63 +271,6 @@ def train_nlp(
 
     return tfidf, best_nlp_clf, scores
 
-def train_tfidf(X_train, X_test, y_train, y_test, scores: dict, experiment: str):
-    """TF-IDF avec enregistrement du meilleur modèle au Registry."""
-    tfidf = TfidfVectorizer(ngram_range=(1, 2))
-    X_tr = tfidf.fit_transform(X_train)
-    X_te = tfidf.transform(X_test)
-
-    best_clf = None
-    best_acc = 0.0
-    best_run_id = None
-
-    classifiers = {
-        "Naive Bayes": MultinomialNB(),
-        "Logistic Regression": LogisticRegression(max_iter=1000),
-        "LinearSVC": LinearSVC(),
-        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
-    }
-
-    print("\n=== TF-IDF ===")
-    for nom, clf in classifiers.items():
-        with mlflow.start_run(run_name=f"TF-IDF_{nom.replace(' ', '_')}") as run:
-            clf.fit(X_tr, y_train)
-            y_pred = clf.predict(X_te)
-            acc = accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred, average="weighted")
-            scores[f"TF-IDF+{nom}"] = acc
-            
-            mlflow.log_param("vectorizer", "TF-IDF")
-            mlflow.log_param("classifier", nom)
-            mlflow.log_metric("accuracy_test", acc)
-            mlflow.log_metric("f1_test", f1)
-            
-            # 🔥 NOUVEAU : Logger le modèle
-            mlflow.sklearn.log_model(clf, artifact_path="model")
-            
-            print(f"  {nom:25s} → Acc: {acc:.4f} | F1: {f1:.4f}")
-            if acc > best_acc:
-                best_acc = acc
-                best_clf = clf
-                best_run_id = run.info.run_id
-
-    # 🔥 Enregistrer le meilleur modèle au Model Registry
-    if best_clf and best_run_id:
-        model_uri = f"runs:/{best_run_id}/model"
-        registered = mlflow.register_model(model_uri, "EcoSmart_NLP_Classifier")
-        print(f"\n✅ Meilleur modèle NLP enregistré au Registry: EcoSmart_NLP_Classifier v{registered.version}")
-        
-        # Promouvoir en Production (optionnel)
-        from mlflow.tracking import MlflowClient
-        client = MlflowClient()
-        client.transition_model_version_stage(
-            name="EcoSmart_NLP_Classifier",
-            version=registered.version,
-            stage="Production"
-        )
-        print(f"   Version {registered.version} → Production")
-
-    return tfidf, best_clf
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -152,8 +152,11 @@ def predict(req: PredictionRequest):
 
     # ── 2. Features numériques ─────────────────────────────────────────────────
     import pandas as pd
-    raw = pd.DataFrame([[req.poids, req.volume, req.conductivite, req.opacite, req.rigidite]],
-                   columns=["Poids", "Volume", "Conductivite", "Opacite", "Rigidite"])
+
+    raw = pd.DataFrame(
+        [[req.poids, req.volume, req.conductivite, req.opacite, req.rigidite]],
+        columns=["Poids", "Volume", "Conductivite", "Opacite", "Rigidite"],
+    )
     scaled = m["scaler"].transform(raw)
     features = np.append(scaled[0], source_enc).reshape(1, -1)
 
